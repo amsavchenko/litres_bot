@@ -14,10 +14,6 @@ df_with_correct_paths = sdf[sdf['Path'] != '---']
 
 app = Flask(__name__)
 
-def write_json(data, filename='answer.json'):
-    with open(filename, 'w') as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
-
 
 def send_message(chat_id, text):
     url = URL + '/sendMessage'
