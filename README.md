@@ -10,6 +10,6 @@
 https://t-do.ru/litresbestprice_bot
 
 ### Скриншоты: ###
-![](screenshots/screen_1.jpg)
-![](screenshots/screen_2.jpg)
-![](screenshots/screen_3.jpg)
+<img src="screenshots/screen_1.jpg" width="200" height="400">
+<img src="screenshots/screen_2.jpg" width="200" height="400">
+<img src="screenshots/screen_3.jpg" width="200" height="400">
