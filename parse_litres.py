@@ -5,18 +5,19 @@ from user_agent import generate_user_agent
 import os
 import glob
 
-#import socks # магия для ТОРА чтобы парсить без ограничений
-#import socket # надо держать тор открытым, все ссылки открываются через него
-#socks.set_default_proxy(socks.SOCKS5, "localhost", 9150)
-#socket.socket = socks.socksocket
+# для того, чтобы все запросы отправлялись через ТОР
+# (надо держать тор открытым) 
+# пакет PySocks 
+import socks 
+import socket 
+socks.set_default_proxy(socks.SOCKS5, "localhost", 9150)
+socket.socket = socks.socksocket
 
-from token_storage import path
-
+from token_storage import path # путь до папки storage с csv-файлами
 
 def extract_month(string):
     # вытягивает из строки вида "июль 2019" месяц и преобразует в дату
     # вида 01.08.2019 - т.е. ДО какого дня будет работать промокод
-
     month = string[:string.rfind(' ')]
     year = string[string.find(' ') + 1:]
     if (month == 'январь'):
@@ -45,9 +46,11 @@ def extract_month(string):
         month = '01.01.'
     return month + year
 
+
 def link_processing(link):
     name = link[link.find('.ru') + 3:link.find('lfrom') - 1]
     return 'https://www.litres.ru' + name
+
 
 def fill_df_from_table(df, table):
     row_marker = 1
@@ -59,6 +62,7 @@ def fill_df_from_table(df, table):
             date = date[date.find(' ')+1:]
         else:
             date = extract_month(date)
+
         df.loc[row_marker, 'To'] = pd.to_datetime(date, format='%d.%m.%Y')
         df.loc[row_marker, 'Promocode'] = link_processing(columns[1].find('a')['href']) if columns[1].get_text() == '[автокод]' else columns[1].get_text().replace('\n', ' ')
         df.loc[row_marker, 'Description'] = columns[2].get_text()
@@ -118,6 +122,7 @@ def parse_link_with_collection(link):
             books_df.loc[0, 'Link'] = books_df.loc[0, 'Author'] = books_df.loc[0, 'Title'] = books_df.loc[0, 'Is_Audio'] = '-'
     return books_df
 
+
 def save_csv_with_collection_and_get_path(link):
     if (link == ''):
         file_name = '---'
@@ -127,11 +132,8 @@ def save_csv_with_collection_and_get_path(link):
         books_df.to_csv(path + file_name)
     return file_name
 
+
 def check_csv_for_link(filename, link):
-    '''
-    input: filename(str), link(str)
-    output: bool - True if file is considering link else False
-    '''
     try:
         df = pd.read_csv(path + filename)
     except FileNotFoundError:
@@ -143,11 +145,8 @@ def check_csv_for_link(filename, link):
             return True
     return False
 
+
 def search_link_in_database(df, link):
-    '''
-    input: df(pd.DataFrame), link(str)
-    output: DataFrame with columns To, Promocode and Description
-    '''
     answer = pd.DataFrame(columns=['To', 'Promocode', 'Description'])
     answer_index = 0
     for i in range(df.shape[0]):
@@ -156,6 +155,7 @@ def search_link_in_database(df, link):
             answer.loc[answer_index] = df.loc[i, ['To', 'Promocode', 'Description']]
             answer_index += 1
     return answer
+
 
 def update():
     r = requests.get('https://lovikod.ru/knigi/promokody-litres')
@@ -174,23 +174,14 @@ def update():
 
     sdf.to_csv(path + 'sdf_2.csv')
 
-def clean_storage_folder():
+
+def clean_storage_folder(path):
     files = glob.glob(path + '*')
     for f in files:
         os.remove(f)
 
-'''
-def test():
-    sdf = pd.read_csv('/Users/amsavchenko/PycharmProjects/bot_litres/csv_storage/sdf_1.csv', index_col=0)
-    #print(sdf)
-    #print(search_link_in_database(sdf, 'https://www.litres.ru/sharlotta-cho/koreyskie-sekrety-krasoty/'))
-    df_with_correct_paths = sdf[sdf['Path'] != '---']
-    random_index = randint(0, df_with_correct_paths.shape[0] - 1)
-    path = df_with_correct_paths.iloc[random_index, 5]
-    df = pd.read_csv(path, index_col=0)
-    print(df)
-'''
 
 if __name__ == "__main__":
-    clean_storage_folder()
+    clean_storage_folder(path)
     update()
+
