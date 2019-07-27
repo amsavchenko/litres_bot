@@ -12,6 +12,7 @@ URL = 'https://api.telegram.org/bot' + TOKEN
 sdf = pd.read_csv(path + 'sdf_2.csv', index_col=0)
 df_with_correct_paths = sdf[sdf['Path'] != '---']
 
+
 app = Flask(__name__)
 
 
@@ -45,6 +46,7 @@ def make_answer(link):
                   str(date.day).zfill(2) + '. ' + str(date.month).zfill(2) + '\n\n'
     return answer
 
+
 def gen_sale():
     answer = (u'\U0001F525')*3 + ' Самые высокие скидки на книги: \n\n'
     for i in range(10):
@@ -54,6 +56,7 @@ def gen_sale():
             str(date.day).zfill(2) + '. ' + str(date.month).zfill(2) + '\n\n'
     return answer + u'\U0001F4DA' + ' Мало скидок? Посмотрите раздел /more_sales '
 
+
 def gen_more_sales():
     answer = u'\U0001F4A3' + ' Ещё больше скидок: \n\n'
     for i in range(10, 30):
@@ -62,6 +65,7 @@ def gen_more_sales():
                   '\nПромокод/ссылка: ' + sdf.loc[i, 'Promocode'] + '\nДействует до: ' + \
                   str(date.day).zfill(2) + '. ' + str(date.month).zfill(2) + '\n\n'
     return answer
+
 
 def gen_free_random():
     answer = u'\U000026A1' + ' Бесплатные книги из подборки: \n'
@@ -85,6 +89,7 @@ def gen_free_random():
             answer += '\n' + 'https://www.litres.ru' + df.loc[i, 'Link'] + '\n\n'
         return answer + u'\U0001F914' + ' Не нашли ничего интересного? Напишите /free_random ещё раз!'
 
+
 def start_message():
     answer = u'\U0001F4D6' + ' Привет!\n\nОсновная функция бота — поиск интересующей тебя книги среди бесплатных подборок. ' +\
             'Для этого найди книгу на ЛитРес, скопируй ссылку и отправь мне. \n\nЕсли её нет в подборках, ' +\
@@ -98,24 +103,26 @@ def start_message():
 def index():
     if request.method == 'POST':
         r = request.get_json()
+
         chat_id = r['message']['chat']['id']
         message = r['message']['text']
+
         if '/sale' in message:
             send_message(chat_id, gen_sale())
+
         elif '/more_sales' in message:
             send_message(chat_id, gen_more_sales())
+
         elif '/free_random' in message:
             send_message(chat_id, gen_free_random())
+
         elif '/start' in message:
             send_message(chat_id, start_message())
+
         else:
             send_message(chat_id, make_answer(message))
         return 'success'
     return '<h1> Hello bot </h1>'
-
-@app.route('/')
-def test():
-    return '<h1> TEEEST!!! </h1>'
 
 
 if __name__ == "__main__":
