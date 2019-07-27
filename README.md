@@ -1,6 +1,6 @@
 # Telegram bot «ЛитРес — скидки, подборки»
 
-Бот помогает экономить при покупке книг на сайте [ЛитРес](https://www.litres.ru). Используется агрегатор скидок [ЛовиКод](https://lovikod.ru/knigi/promokody-litres)
+Бот помогает экономить при покупке книг на сайте [ЛитРес](https://www.litres.ru). Используется агрегатор скидок [ЛовиКод](https://lovikod.ru/knigi/promokody-litres).
 
 Основная функция — поиск интересующей книги среди бесплатных подборок. Для этого надо отправить боту ссылку на книгу. 
 
@@ -8,3 +8,8 @@
 
 ### Ссылка: ###
 https://t-do.ru/litresbestprice_bot
+
+### Скриншоты: ###
+![](screenshots/screen_1.jpg)
+![](screenshots/screen_2.jpg)
+![](screenshots/screen_3.jpg)
