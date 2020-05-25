@@ -15,8 +15,8 @@ create table books(
 
 create table prcbooks(
     prc_id integer,
-    book_link integer,
+    book_link text,
     primary key (prc_id, book_link),
-    foreign key prc_id references promocodes(prc_id),
-    foreign key book_link references books(book_link)
+    foreign key (prc_id) references promocodes(prc_id),
+    foreign key (book_link) references books(book_link)
 );
