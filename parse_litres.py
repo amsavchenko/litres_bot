@@ -4,6 +4,7 @@ import pandas as pd
 from user_agent import generate_user_agent
 import os
 import glob
+import re
 
 # для того, чтобы все запросы отправлялись через ТОР
 # (надо держать тор открытым) 
@@ -48,8 +49,9 @@ def extract_month(string):
 
 
 def link_processing(link):
-    name = link[link.find('.ru') + 3:link.find('lfrom') - 1]
-    return 'https://www.litres.ru' + name
+    name = re.search(r'\.ru[-/\w\d]*', link)[0]
+    # name = link[link.find('.ru') + 3:link.find('lfrom') - 1]
+    return 'https://www.litres' + name
 
 
 def fill_df_from_table(df, table):
