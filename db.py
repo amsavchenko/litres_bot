@@ -37,15 +37,17 @@ def insert(table: str, values: list):
     conn.commit()
 
 
-def get_cursor():
-    return cursor
-
-
 def _init_db():
     with open('create_db.sql', 'r') as f:
         sql = f.read()
     cursor.executescript(sql)
     conn.commit()
+
+
+def table_exists(table_name):
+    cursor.execute("SELECT name FROM sqlite_master  "
+                   f"WHERE type='table'AND name='{table_name}'")
+    return bool(cursor.fetchone())
 
 
 def check_db_exist():
@@ -54,7 +56,6 @@ def check_db_exist():
     table_exists = cursor.fetchall()
     if not table_exists:
         _init_db()
-
 
 
 check_db_exist()
