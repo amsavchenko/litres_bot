@@ -1,0 +1,77 @@
+import requests
+from bs4 import BeautifulSoup
+import re
+from user_agent import generate_user_agent
+
+from db import insert, insert_into_prcbooks
+
+lovikod_link = 'https://lovikod.ru/knigi/promokody-litres'
+
+
+def link_processing(link):
+    name = re.search(r'\.ru[-/\w\d]*', link)[0]
+    return 'https://www.litres' + name
+
+
+def add_table_to_database(table):
+    row_index = 1
+    collections = []
+    promocodes = []
+    for row in table.find_all('tr')[1:]:
+        columns = row.find_all('td')
+        date = columns[0].text
+        text = link_processing(columns[1].find('a')['href']) if columns[1].get_text() == '[автокод]' else columns[1].get_text().replace('\n', ' ')
+        description = columns[2].text
+        collection_link = link_processing(columns[2].find('a')['href']) if columns[2].find('a') is not None else '-'
+        if re.search(r'\d+%', description) is not None:
+            rate = int(re.search(r'\d+%', description)[0][:-1])
+        elif re.search(r'бесплатно', description):
+            rate = 100
+        else:
+            rate = 0
+        promocodes.append((row_index, date, description, text, rate, collection_link))
+        collections.append(collection_link)
+        row_index += 1
+    insert('promocodes', promocodes)
+    return (row_index, collections)
+
+
+def parse_link_with_collection(index_collection):
+    prc_id = index_collection[0]
+    collection_link = index_collection[1]
+    prc_books = []
+    books = []
+    test_request = requests.get(collection_link, headers={'User-Agent': generate_user_agent()})
+    if collection_link.find('kollekcii-knig') != -1:
+        pages_num = int(BeautifulSoup(test_request.text, 'html.parser').find('div', {'class': 'left_column books_container'})['data-pages'])
+        for i in range(1, pages_num + 1):
+            request = requests.get(collection_link + f'page-{i}', headers={'User-Agent': generate_user_agent()})
+            bs = BeautifulSoup(request.text, 'html.parser')
+            for book in bs.find_all('div', {'class': 'art-item'}):
+                link = book.find('div', {'class': 'art-item__name'}).find('a')['href']
+                author = book.find('div', {'class': 'art-item__author'}).get_text()
+                title = book.find('div', {'class': 'art-item__name'}).get_text()
+                prc_books.append((prc_id, link))
+                books.append((link, author, title))
+
+    else: # если в подборке только одна книга, то даётся прямая ссылка на неё
+        soup = BeautifulSoup(test_request.text, 'html.parser')
+        author = soup.find('a', {'class': 'biblio_book_author__link'}).get_text()
+        full_title = soup.find('h1', {'itemprop': 'name'}).get_text()
+        title = full_title[:full_title.find('\xa0')]
+        prc_books.append((prc_id, collection_link))
+        books.append((collection_link, author, title))
+    insert('books', books)
+    insert('prcbooks', prc_books)
+
+
+
+def update():
+    r = requests.get(lovikod_link)
+    soup = BeautifulSoup(r.text, 'html.parser')
+    table = soup.find('table')
+    index_collections = add_table_to_database(table)
+
+
+if __name__ == "__main__":
+    update()

@@ -37,13 +37,6 @@ def insert(table: str, values: list):
     conn.commit()
 
 
-def insert_into_prcbooks(values: list):
-    cursor.executemany(
-        "INSERT INTO prcbooks values (?, ?)", values
-    )
-    conn.commit()
-
-
 def get_cursor():
     return cursor
 
