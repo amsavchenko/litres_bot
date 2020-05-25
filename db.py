@@ -37,6 +37,11 @@ def insert(table: str, values: list):
     conn.commit()
 
 
+def select_sales(num_limit=10):
+    cursor.execute('SELECT prc_date, prc_description, prc_text '
+                   f'FROM promocodes ORDER BY prc_rate DESC LIMIT {num_limit}')
+    return cursor.fetchall()
+
 def _init_db():
     with open('create_db.sql', 'r') as f:
         sql = f.read()
