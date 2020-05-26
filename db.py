@@ -43,6 +43,26 @@ def select_sales(num_limit=10):
     return cursor.fetchall()
 
 
+def select_random_collection(num_limit=10):
+    cursor.execute('SELECT DISTINCT prc_id FROM prcbooks ORDER BY RANDOM() LIMIT 1')
+    prc_id = cursor.fetchone()
+    cursor.execute('SELECT prc_description, prc_text FROM promocodes WHERE prc_id = ?', prc_id)
+    description_text = cursor.fetchone()
+    cursor.execute('SELECT book_link, book_author, book_title FROM books WHERE book_link IN'
+                   f'(SELECT book_link FROM prcbooks WHERE prc_id = ?) ORDER BY RANDOM() LIMIT {num_limit}', prc_id)
+    return (description_text, cursor.fetchall())
+
+
+def select_book_by_link(link):
+    cursor.execute(f"SELECT prc_id FROM prcbooks WHERE book_link = '{link}'")
+    prc_id = cursor.fetchall()
+    if prc_id:
+        placeholders = ', '.join('?' * len(prc_id))
+        cursor.execute(f'SELECT prc_description, prc_text FROM promocodes WHERE prc_id IN ({placeholders})', [id[0] for id in prc_id])
+        return cursor.fetchall()
+    return False
+
+
 def _init_db():
     with open('create_db.sql', 'r') as f:
         sql = f.read()

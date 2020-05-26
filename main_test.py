@@ -2,7 +2,7 @@ import logging
 from aiogram import Bot, Dispatcher, executor, types
 
 from token_storage import TOKEN
-from db import select_sales
+from db import select_sales, select_random_collection, select_book_by_link
 
 
 logging.basicConfig(level=logging.INFO)
@@ -37,6 +37,28 @@ async def more_sales(message: types.Message):
     for index, row in enumerate(rows, 1):
         answer += f'{index}) {row[1]}\nПромокод/ссылка: {row[2]}\nДействует до: {row[0]}\n\n'
     answer += 'Ищешь что-то конкретное? Отправь мне ссылку на книгу / или ...'
+    await message.answer(answer)
+
+
+@dp.message_handler(commands=['free_random'])
+async def free_random(message: types.Message):
+    description_text, rows = select_random_collection()
+    answer = u'\U000026A1' + f' Бесплатные книги из подборки: {description_text[0]}\nПромокод/ссылка: {description_text[1]}\n\n'
+    for index, row in enumerate(rows, 1):
+        answer += f'{index}) "{row[2]}"\nАвтор: {row[1]}\nСсылка: {row[0]}\n\n'
+    answer += u'\U0001F914' + ' Не нашли ничего интересного? Напишите /free_random ещё раз!'
+    await message.answer(answer)
+
+
+@dp.message_handler(lambda message : 'litres.ru' in message.text)
+async def search_link(message: types.Message):
+    rows = select_book_by_link(message.text)
+    if not rows:
+        answer = u'\U0001F61E' + ' К сожалению, этой книги нет в бесплатных подборках\nПосмотри раздел /sale со скидками на книги'
+    else:
+        answer = u'\U0001F4D6' + ' Ура! Книга нашлась в бесплатных подборках:\n'
+        for index, row in enumerate(rows, 1):
+            answer += f'{index}) {row[0]}\nПромокод/ссылка: {row[1]}\n\n'
     await message.answer(answer)
 
 
