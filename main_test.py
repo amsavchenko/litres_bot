@@ -2,7 +2,7 @@ import logging
 from aiogram import Bot, Dispatcher, executor, types
 
 from token_storage import TOKEN
-from db import select_sales, select_random_collection, select_book_by_link
+from db import select_sales, select_random_collection, select_book_by_link, select_book_by_title_or_author
 
 
 logging.basicConfig(level=logging.INFO)
@@ -59,6 +59,21 @@ async def search_link(message: types.Message):
         answer = u'\U0001F4D6' + ' Ура! Книга нашлась в бесплатных подборках:\n'
         for index, row in enumerate(rows, 1):
             answer += f'{index}) {row[0]}\nПромокод/ссылка: {row[1]}\n\n'
+    await message.answer(answer)
+
+
+@dp.message_handler()
+async def search_title_or_author(message: types.Message):
+    search_result = select_book_by_title_or_author(message.text)
+    if not search_result:
+        answer = u'\U0001F61E' + ' К сожалению, такой книги нет в бесплатных подборках\nПосмотри раздел /sale со скидками на книги'
+    else:
+        answer = u'\U0001F4D6' + ' Вот, что я нашёл:\n'
+        for index, book in enumerate(search_result, 1):
+            answer += f'{index}) "{book[1]}"\nАвтор: {book[2]}\nСсылка: {book[0]}\n\n'
+            for collection in book[3]:
+                answer += f'Подборка: {collection[0]}\nПромокод/ссылка: {collection[1]}\n'
+            answer += '\n\n'
     await message.answer(answer)
 
 

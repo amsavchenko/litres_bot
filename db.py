@@ -63,6 +63,19 @@ def select_book_by_link(link):
     return False
 
 
+def select_book_by_title_or_author(message):
+    answer = []
+    cursor.execute("SELECT book_link, book_title, book_author FROM books WHERE "
+                   f"book_author LIKE '{message}%' OR book_title LIKE '{message}%'")
+    for book in cursor.fetchall():
+        link, title, author = book
+        cursor.execute("SELECT prc_description, prc_text FROM promocodes WHERE prc_id IN "
+                       f"( SELECT prc_id FROM prcbooks WHERE book_link = '{link}' )")
+        description_text = cursor.fetchall()
+        answer.append((link, title, author, description_text))
+    return answer
+
+
 def _init_db():
     with open('create_db.sql', 'r') as f:
         sql = f.read()
