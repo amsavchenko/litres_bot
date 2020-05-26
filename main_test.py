@@ -1,13 +1,11 @@
 import logging
-
 from aiogram import Bot, Dispatcher, executor, types
 
 from token_storage import TOKEN
 from db import select_sales
 
-logging.basicConfig(level=logging.INFO)
 
-# initialize bot and dispatcher
+logging.basicConfig(level=logging.INFO)
 bot = Bot(token=TOKEN)
 dp = Dispatcher(bot)
 
@@ -23,12 +21,22 @@ async def start(message: types.Message):
 
 
 @dp.message_handler(commands=['sale'])
-async def sale(message: types.Message):
+async def sales(message: types.Message):
     rows = select_sales()
     answer = (u'\U0001F525')*3 + ' Самые высокие скидки на книги:\n\n'
     for index, row in enumerate(rows, 1):
         answer += f'{index}) {row[1]}\nПромокод/ссылка: {row[2]}\nДействует до: {row[0]}\n\n'
     answer += u'\U0001F4DA' + ' Мало скидок? Посмотрите раздел /more_sales '
+    await message.answer(answer)
+
+
+@dp.message_handler(commands=['more_sales'])
+async def more_sales(message: types.Message):
+    rows = select_sales(30)[10:]
+    answer = u'\U0001F4A3' + ' Ещё больше скидок: \n\n'
+    for index, row in enumerate(rows, 1):
+        answer += f'{index}) {row[1]}\nПромокод/ссылка: {row[2]}\nДействует до: {row[0]}\n\n'
+    answer += 'Ищешь что-то конкретное? Отправь мне ссылку на книгу / или ...'
     await message.answer(answer)
 
 
