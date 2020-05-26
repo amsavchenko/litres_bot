@@ -14,8 +14,8 @@ lovikod_link = 'https://lovikod.ru/knigi/promokody-litres'
 
 
 def link_processing(link):
-    name = re.search(r'\.ru[-/\w\d]*', link)[0]
-    return 'https://www.litres' + name
+    name = link[link.find('.ru') + 3:link.find('lfrom') - 1]
+    return 'https://www.litres.ru' + name
 
 
 def add_table_to_database(table):
