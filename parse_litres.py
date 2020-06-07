@@ -74,12 +74,13 @@ def parse_link_with_collection(index_collection):
 
 
 def update():
+    # delete all rows from 3 tables
     r = requests.get(lovikod_link)
     soup = BeautifulSoup(r.text, 'html.parser')
     table = soup.find('table')
     index_collections = add_table_to_database(table)
-    # for loop
-    parse_link_with_collection(index_collections[0])
+    for index in index_collections:
+        parse_link_with_collection(index)
 
 
 if __name__ == "__main__":
