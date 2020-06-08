@@ -53,7 +53,8 @@ def select_book_by_title_or_author(message):
                        f"( SELECT prc_id FROM prcbooks WHERE book_link = '{link}' )")
         description_text = cursor.fetchall()
         answer.append((link, title, author, description_text))
-    return answer
+    # ограничиваем число совпадений, иначе сообщение получается слишком длинным
+    return answer[:7]
 
 
 def clear_all_tables():
