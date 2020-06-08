@@ -6,34 +6,14 @@ conn = sqlite3.connect(db_name)
 cursor = conn.cursor()
 
 
-# def post_sql_query(sql_query):
-#     with sqlite3.connect(db_name) as con:
-#         cursor = con.cursor()
-#         try:
-#             cursor.execute(sql_query)
-#         except Error:
-#             pass
-#         result = cursor.fetchall()
-#         return result
-
-# def insert(table: str, column_values: dict):
-#     columns = ', '.join(column_values.keys())
-#     values = [tuple(column_values.values())]
-#     placeholders = ', '.join('?' * len(column_values.keys()))
-#     cursor.executemany(
-#         f"INSERT into {table} "
-#         f"({columns})"
-#         f"VALUES ({placeholders}) ",
-#         values
-#     )
-#     conn.commit()
-
-
 def insert(table: str, values: list):
     placeholders = ', '.join('?' * len(values[0]))
-    cursor.executemany(
-        f"INSERT INTO {table} VALUES ({placeholders})", values
-    )
+    try:
+        cursor.executemany(
+            f"INSERT INTO {table} VALUES ({placeholders})", values
+        )
+    except Error:
+        pass
     conn.commit()
 
 
@@ -76,6 +56,12 @@ def select_book_by_title_or_author(message):
     return answer
 
 
+def clear_all_tables():
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
+    for table in cursor.fetchall():
+        cursor.execute(f"DELETE FROM {table[0]}")
+
+
 def _init_db():
     with open('create_db.sql', 'r') as f:
         sql = f.read()
@@ -85,7 +71,7 @@ def _init_db():
 
 def table_exists(table_name):
     cursor.execute("SELECT name FROM sqlite_master  "
-                   f"WHERE type='table'AND name='{table_name}'")
+                   f"WHERE type='table' AND name='{table_name}'")
     return bool(cursor.fetchone())
 
 

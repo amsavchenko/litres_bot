@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 import re
 from user_agent import generate_user_agent
 
-from db import insert
+from db import insert, clear_all_tables
 
 import socks
 import socket
@@ -19,6 +19,9 @@ def link_processing(link):
 
 
 def add_table_to_database(table):
+    '''
+    Add promocodes into "promocodes" table
+    '''
     row_index = 1
     collections = []
     promocodes = []
@@ -38,17 +41,22 @@ def add_table_to_database(table):
         collections.append((row_index, collection_link))
         row_index += 1
     insert('promocodes', promocodes)
+    print('Table promocodes is filled')
     return collections
 
 
 def parse_link_with_collection(index_collection):
     prc_id = index_collection[0]
     collection_link = index_collection[1]
+    if collection_link == '-':
+        return
     prc_books = []
-    books = []
     test_request = requests.get(collection_link, headers={'User-Agent': generate_user_agent()})
-    if collection_link.find('kollekcii-knig') != -1:
-        pages_num = int(BeautifulSoup(test_request.text, 'html.parser').find('div', {'class': 'books_container'})['data-pages'])
+    if collection_link.find('kollekcii-knig') != -1 or collection_link.find('luchshie-knigi'):
+        try:
+            pages_num = int(BeautifulSoup(test_request.text, 'html.parser').find('div', {'class': 'books_container'})['data-pages'])
+        except TypeError:
+            pages_num = 1
         for i in range(1, pages_num + 1):
             request = requests.get(collection_link + f'page-{i}', headers={'User-Agent': generate_user_agent()})
             bs = BeautifulSoup(request.text, 'html.parser')
@@ -58,7 +66,7 @@ def parse_link_with_collection(index_collection):
                 author = book.find('div', {'class': 'art__author'}).text
                 title = book.find('div', {'class': 'art__name'}).text
                 prc_books.append((prc_id, link))
-                books.append((link, author, title))
+                insert('books', [(link, author, title)])
     elif collection_link.find('my_account') != -1:
         return
 
@@ -67,20 +75,24 @@ def parse_link_with_collection(index_collection):
         author = soup.find('a', {'class': 'biblio_book_author__link'}).get_text()
         title = soup.find_all('li', {'class': 'breadcrumbs__item'})[-1].text
         prc_books.append((prc_id, collection_link))
-        books.append((collection_link, author, title))
-    insert('books', books)
+        insert('books', [(collection_link, author, title)])
     insert('prcbooks', prc_books)
 
 
 
 def update():
     # delete all rows from 3 tables
+    clear_all_tables()
     r = requests.get(lovikod_link)
     soup = BeautifulSoup(r.text, 'html.parser')
     table = soup.find('table')
     index_collections = add_table_to_database(table)
-    for index in index_collections:
-        parse_link_with_collection(index)
+    for index in index_collections[35:]:
+        try:
+            parse_link_with_collection(index)
+            print(f'{index} - success')
+        except Exception:
+            print(f'{index} - NOT success')
 
 
 if __name__ == "__main__":
