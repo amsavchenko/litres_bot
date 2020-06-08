@@ -12,10 +12,10 @@ dp = Dispatcher(bot)
 
 @dp.message_handler(commands=['start'])
 async def start(message: types.Message):
-    answer = u'\U0001F4D6' + ' Привет!\n\nОсновная функция бота — поиск интересующей тебя книги среди бесплатных подборок. ' + \
-             'Для этого найди книгу на ЛитРес, скопируй ссылку и отправь мне. \n\nЕсли её нет в подборках, ' + \
+    answer = u'\U0001F4D6' + ' Привет!\n\nОсновная функция бота — поиск интересующей тебя книги среди бесплатных подборок.\n\n' + \
+             'Для этого найди книгу на ЛитРес, скопируй ссылку и отправь мне. Так же можешь прислать название или автора - постараюсь найти. '+ \
+             '\n\nЕсли книги нет в подборках, ' + \
              'могу предложить другие бесплатные книги (/free_random) или скидки, действующие на все книги (/sale)\n\n' + \
-             u'\U0001F916' + ' Иногда бот долго думает, но всё равно обязательно ответит\n' + \
              u'\U0001F468' + u'\U0000200D' + u'\U0001F4BB' + 'создатель: @amsavchenko'
     await message.answer(answer)
 
@@ -71,8 +71,7 @@ async def search_title_or_author(message: types.Message):
         answer = u'\U0001F4D6' + ' Вот, что я нашёл:\n'
         for index, book in enumerate(search_result, 1):
             answer += f'{index}) "{book[1]}"\nАвтор: {book[2]}\nСсылка: {book[0]}\n\n'
-            for collection in book[3]:
-                answer += f'Подборка: {collection[0]}\nПромокод/ссылка: {collection[1]}\n'
+            answer += f'Подборка: {book[3][0][0]}\nПромокод/ссылка: {book[3][0]}\n'
             answer += '\n\n'
     await message.answer(answer)
 
