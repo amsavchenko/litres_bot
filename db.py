@@ -46,7 +46,7 @@ def select_book_by_link(link):
 def select_book_by_title_or_author(message):
     answer = []
     cursor.execute("SELECT book_link, book_title, book_author FROM books WHERE "
-                   f"book_author LIKE '{message}%' OR book_title LIKE '{message}%'")
+                   f"book_author LIKE '%{message}%' OR book_title LIKE '{message}%'")
     for book in cursor.fetchall():
         link, title, author = book
         cursor.execute("SELECT prc_description, prc_text FROM promocodes WHERE prc_id IN "
