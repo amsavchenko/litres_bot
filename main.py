@@ -70,9 +70,9 @@ async def search_title_or_author(message: types.Message):
     else:
         answer = u'\U0001F4D6' + ' Вот, что я нашёл:\n'
         for index, book in enumerate(search_result, 1):
-            answer += f'{index}) "{book[1]}"\nАвтор: {book[2]}\nСсылка: {book[0]}\n\n'
-            answer += f'Подборка: {book[3][0][0]}\nПромокод/ссылка: {book[3][0]}\n'
-            answer += '\n\n'
+            answer += f'{index}) "{book[1]}"\nАвтор: {book[2]}\nСсылка: {book[0]}\n'
+            for collection in book[3][:1]:
+                answer += f'Подборка: {collection[0]}\nПромокод/ссылка: {collection[1]}\n\n'
     await message.answer(answer)
 
 
