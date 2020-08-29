@@ -24,7 +24,7 @@
 - `python main.py`
 
 ### Скриншоты: ###
-<img src="screenshots/screen_1.png" width="220" height="410">
-<img src="screenshots/screen_2.png" width="220" height="410">
-<img src="screenshots/screen_3.png" width="220" height="410">
+<img src="screenshots/screen_1.PNG" width="220" height="410">
+<img src="screenshots/screen_2.PNG" width="220" height="410">
+<img src="screenshots/screen_3.PNG" width="220" height="410">
 
